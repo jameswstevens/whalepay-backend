@@ -1,0 +1,40 @@
+service: whalepay-backend
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  stage: ${opt:stage, 'dev'}
+  region: ${opt:region, 'us-east-1'}
+  environment:
+    COINBASE_KEY_NAME: ${env:COINBASE_KEY_NAME}
+    COINBASE_KEY_SECRET: ${env:COINBASE_KEY_SECRET}
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - execute-api:Invoke
+          Resource: "*"
+
+functions:
+  api:
+    handler: src/lambda.handler
+    events:
+      - httpApi:
+          path: /
+          method: GET
+      - httpApi:
+          path: /api/{proxy+}
+          method: ANY
+    cors: true
+
+# Using built-in esbuild
+custom:
+  build:
+    esbuild:
+      bundle: true
+      minify: true
+      sourcemap: true
+      exclude: ['aws-sdk']
+      target: 'node18'
+      platform: 'node'
