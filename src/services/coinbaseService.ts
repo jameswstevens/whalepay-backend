@@ -4,17 +4,19 @@ import { coinbaseConfig } from '../config/coinbase';
 
 export class CoinbaseService {
   private async getAuthHeaders(method: string, path: string) {
-    const baseUrl = path.startsWith('/onramp') 
-      ? 'api.developer.coinbase.com' 
-      : 'api.coinbase.com';
-      
+    const baseUrl = 'api.developer.coinbase.com';
+    
+    // For GET requests, strip query params from path for JWT signing
+    const pathForJWT = method === 'GET' ? path.split('?')[0] : path;
+    
     const jwt = generateJWT({
       ...coinbaseConfig,
       baseUrl
-    }, method, path);
+    }, method, pathForJWT);
     
     return {
-      Authorization: `Bearer ${jwt}`,
+      'Authorization': `Bearer ${jwt}`,
+      'Content-Type': 'application/json'
     };
   }
 
@@ -57,15 +59,33 @@ export class CoinbaseService {
     }
   }
 
-  async getKeyPermissions() {
-    const path = '/api/v3/brokerage/key_permissions';
+  async getOptions(country?: string, subdivision?: string) {
+    if (!country || !subdivision) {
+      throw new Error('Country and subdivision are required parameters');
+    }
+    
+    const queryParams = `?country=${country}&subdivision=${subdivision}`;
+    const path = `/onramp/v1/buy/options${queryParams}`;
     const headers = await this.getAuthHeaders('GET', path);
     
     try {
-      const response = await axios.get(`https://api.coinbase.com${path}`, { headers });
-      return response.data;
+      const response = await axios.get(`https://api.developer.coinbase.com${path}`, { headers });
+      
+      // Filter for just USDC information
+      const usdcInfo = response.data.purchase_currencies.find(
+        (currency: any) => currency.symbol === 'USDC'
+      );
+      
+      return usdcInfo || null;
     } catch (error) {
-      throw new Error(`Failed to fetch key permissions: ${error}`);
+      if (axios.isAxiosError(error)) {
+        console.error('Options Error:', {
+          status: error.response?.status,
+          statusText: error.response?.statusText,
+          data: error.response?.data
+        });
+      }
+      throw new Error(`Failed to fetch options: ${error}`);
     }
   }
 }

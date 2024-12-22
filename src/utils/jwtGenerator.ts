@@ -10,7 +10,6 @@ export const generateJWT = (
   requestPath: string
 ): string => {
 
-  console.log('config', config);
   const uri = `${requestMethod} ${config.baseUrl}${requestPath}`;
   
   const payload: JWTPayload = {

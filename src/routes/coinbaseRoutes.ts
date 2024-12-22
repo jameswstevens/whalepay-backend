@@ -13,11 +13,14 @@ router.post('/quote', async (req, res) => {
     }
 });
 
-// Add this new route
-router.get('/permissions', async (req, res) => {
+// Get options for buying crypto
+router.get('/options', async (req, res) => {
+    console.log('Getting options');
     try {
-        const permissions = await coinbaseService.getKeyPermissions();
-        res.json(permissions);
+        const country = req.query.country as string;
+        const subdivision = req.query.subdivision as string;
+        const options = await coinbaseService.getOptions(country, subdivision);
+        res.json(options);
     } catch (error) {
         res.status(500).json({ error: error instanceof Error ? error.message : 'Unknown error' });
     }
