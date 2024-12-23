@@ -3,9 +3,7 @@ import { generateJWT } from '../utils/jwtGenerator';
 import { coinbaseConfig } from '../config/coinbase';
 
 export class CoinbaseService {
-  private async getAuthHeaders(method: string, path: string) {
-    const baseUrl = 'api.developer.coinbase.com';
-    
+  private async getAuthHeaders(method: string, path: string, baseUrl: string = 'api.developer.coinbase.com') {
     // For GET requests, strip query params from path for JWT signing
     const pathForJWT = method === 'GET' ? path.split('?')[0] : path;
     
@@ -22,7 +20,7 @@ export class CoinbaseService {
 
   async getOnrampQuote(data: any) {
     const path = '/onramp/v1/buy/quote';
-    const headers = await this.getAuthHeaders('POST', path);
+    const headers = await this.getAuthHeaders('POST', path, 'api.developer.coinbase.com');
     
     try {
       const response = await axios.post(`https://api.developer.coinbase.com${path}`, data, { headers });
@@ -46,7 +44,7 @@ export class CoinbaseService {
     
     const queryParams = `?country=${country}&subdivision=${subdivision}`;
     const path = `/onramp/v1/buy/options${queryParams}`;
-    const headers = await this.getAuthHeaders('GET', path);
+    const headers = await this.getAuthHeaders('GET', path, 'api.developer.coinbase.com');
     
     try {
       const response = await axios.get(`https://api.developer.coinbase.com${path}`, { headers });
@@ -71,7 +69,7 @@ export class CoinbaseService {
 
   async getOfframpConfig() {
     const path = '/onramp/v1/sell/config';
-    const headers = await this.getAuthHeaders('GET', path);
+    const headers = await this.getAuthHeaders('GET', path, 'api.developer.coinbase.com');
     
     try {
       const response = await axios.get(`https://api.developer.coinbase.com${path}`, { headers });
@@ -98,7 +96,7 @@ export class CoinbaseService {
       path += `&subdivision=${subdivision}`;
     }
     
-    const headers = await this.getAuthHeaders('GET', path);
+    const headers = await this.getAuthHeaders('GET', path, 'api.developer.coinbase.com');
     
     try {
       const response = await axios.get(`https://api.developer.coinbase.com${path}`, { headers });
@@ -119,13 +117,38 @@ export class CoinbaseService {
 
   async getOfframpQuote(data: any) {
     const path = '/onramp/v1/sell/quote';
-    const headers = await this.getAuthHeaders('POST', path);
+    const headers = await this.getAuthHeaders('POST', path, 'api.developer.coinbase.com');
     
     try {
       const response = await axios.post(`https://api.developer.coinbase.com${path}`, data, { headers });
       return response.data;
     } catch (error) {
       throw new Error(`Failed to fetch offramp quote: ${error}`);
+    }
+  }
+
+  async getTransactions(address: string) {
+    const path = `/platform/v1/networks/base-mainnet/addresses/${address.toLowerCase()}/transactions`;
+    const headers = await this.getAuthHeaders('GET', path, 'api.cdp.coinbase.com');
+    
+    try {
+      const response = await axios.get(`https://api.cdp.coinbase.com${path}`, { 
+        headers,
+        params: {
+          limit: 100 // Adjust as needed
+        }
+      });
+      
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.error('Transactions Error:', {
+          status: error.response?.status,
+          statusText: error.response?.statusText,
+          data: error.response?.data
+        });
+      }
+      throw new Error(`Failed to fetch transactions: ${error}`);
     }
   }
   

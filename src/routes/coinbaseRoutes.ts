@@ -62,4 +62,15 @@ router.post('/offramp-quote', async (req, res) => {
     }
 });
 
+// Get transactions for an address
+router.get('/transactions/:address', async (req, res) => {
+    try {
+        const { address } = req.params;
+        const transactions = await coinbaseService.getTransactions(address);
+        res.json(transactions);
+    } catch (error) {
+        res.status(500).json({ error: error instanceof Error ? error.message : 'Unknown error' });
+    }
+});
+
 export default router;
