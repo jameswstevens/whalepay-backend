@@ -116,6 +116,19 @@ export class CoinbaseService {
       throw new Error(`Failed to fetch offramp options: ${error}`);
     }
   }
+
+  async getOfframpQuote(data: any) {
+    const path = '/onramp/v1/sell/quote';
+    const headers = await this.getAuthHeaders('POST', path);
+    
+    try {
+      const response = await axios.post(`https://api.developer.coinbase.com${path}`, data, { headers });
+      return response.data;
+    } catch (error) {
+      throw new Error(`Failed to fetch offramp quote: ${error}`);
+    }
+  }
+  
 }
 
 export const coinbaseService = new CoinbaseService();

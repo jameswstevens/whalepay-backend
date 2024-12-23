@@ -52,4 +52,14 @@ router.get('/offramp-options', async (req, res) => {
     }
 });
 
+// Get offramp quote for selling crypto
+router.post('/offramp-quote', async (req, res) => {
+    try {
+        const quote = await coinbaseService.getOfframpQuote(req.body);
+        res.json(quote);
+    } catch (error) {
+        res.status(500).json({ error: error instanceof Error ? error.message : 'Unknown error' });
+    }
+});
+
 export default router;
