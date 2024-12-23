@@ -20,46 +20,26 @@ export class CoinbaseService {
     };
   }
 
-  async getQuote(data: {
-    purchase_currency: string;
-    payment_amount: string;
-    payment_currency: string;
-    payment_method: string;
-    country: string;
-    subdivision: string;
-  }) {
+  async getOnrampQuote(data: any) {
     const path = '/onramp/v1/buy/quote';
     const headers = await this.getAuthHeaders('POST', path);
     
-    console.log('=== Quote Request Details ===');
-    console.log('URL:', `https://api.developer.coinbase.com${path}`);
-    console.log('Headers:', JSON.stringify(headers, null, 2));
-    console.log('Data:', JSON.stringify(data, null, 2));
-    
     try {
       const response = await axios.post(`https://api.developer.coinbase.com${path}`, data, { headers });
-      console.log('Quote Success:', response.data);
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
         console.error('Quote Error:', {
           status: error.response?.status,
           statusText: error.response?.statusText,
-          data: error.response?.data,
-          headers: error.response?.headers,
-          config: {
-            url: error.config?.url,
-            method: error.config?.method,
-            headers: error.config?.headers,
-            data: error.config?.data
-          }
+          data: error.response?.data
         });
       }
       throw new Error(`Failed to fetch quote: ${error}`);
     }
   }
 
-  async getOptions(country?: string, subdivision?: string) {
+  async getOnrampOptions(country?: string, subdivision?: string) {
     if (!country || !subdivision) {
       throw new Error('Country and subdivision are required parameters');
     }
@@ -86,6 +66,54 @@ export class CoinbaseService {
         });
       }
       throw new Error(`Failed to fetch options: ${error}`);
+    }
+  }
+
+  async getOfframpConfig() {
+    const path = '/onramp/v1/sell/config';
+    const headers = await this.getAuthHeaders('GET', path);
+    
+    try {
+      const response = await axios.get(`https://api.developer.coinbase.com${path}`, { headers });
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.error('Offramp Config Error:', {
+          status: error.response?.status,
+          statusText: error.response?.statusText,
+          data: error.response?.data
+        });
+      }
+      throw new Error(`Failed to fetch offramp config: ${error}`);
+    }
+  }
+
+  async getOfframpOptions(country?: string, subdivision?: string) {
+    if (!country) {
+      throw new Error('Country is a required parameter');
+    }
+    
+    let path = `/onramp/v1/sell/options?country=${country}`;
+    if (subdivision) {
+      path += `&subdivision=${subdivision}`;
+    }
+    
+    const headers = await this.getAuthHeaders('GET', path);
+    
+    try {
+      const response = await axios.get(`https://api.developer.coinbase.com${path}`, { headers });
+      
+      console.log('Offramp Options Success:', response.data);
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.error('Offramp Options Error:', {
+          status: error.response?.status,
+          statusText: error.response?.statusText,
+          data: error.response?.data
+        });
+      }
+      throw new Error(`Failed to fetch offramp options: ${error}`);
     }
   }
 }
