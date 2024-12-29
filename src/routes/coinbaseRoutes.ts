@@ -73,4 +73,33 @@ router.get('/transactions/:address', async (req, res) => {
     }
 });
 
+// Get offramp transaction status
+router.get('/offramp-transaction/:partnerUserId', async (req, res) => {
+    try {
+        const { partnerUserId } = req.params;
+        const status = await coinbaseService.getOfframpTransactionStatus(partnerUserId);
+        res.json(status);
+    } catch (error) {
+        res.status(500).json({ error: error instanceof Error ? error.message : 'Unknown error' });
+    }
+});
+
+// Get offramp transactions for a user
+router.get('/offramp-transactions/:partnerUserId', async (req, res) => {
+    try {
+        const { partnerUserId } = req.params;
+        const { page_key, page_size } = req.query;
+        
+        const transactions = await coinbaseService.getOfframpTransactions(
+            partnerUserId,
+            page_key as string,
+            page_size ? parseInt(page_size as string) : undefined
+        );
+        
+        res.json(transactions);
+    } catch (error) {
+        res.status(500).json({ error: error instanceof Error ? error.message : 'Unknown error' });
+    }
+});
+
 export default router;

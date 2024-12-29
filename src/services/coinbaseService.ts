@@ -151,6 +151,48 @@ export class CoinbaseService {
       throw new Error(`Failed to fetch transactions: ${error}`);
     }
   }
+
+  async getOfframpTransactionStatus(transactionId: string) {
+    const path = `/onramp/v1/sell/transactions/${transactionId}`;
+    const headers = await this.getAuthHeaders('GET', path, 'api.developer.coinbase.com');
+    
+    try {
+      const response = await axios.get(`https://api.developer.coinbase.com${path}`, { headers });
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.error('Offramp Transaction Status Error:', {
+          status: error.response?.status,
+          statusText: error.response?.statusText,
+          data: error.response?.data
+        });
+      }
+      throw new Error(`Failed to fetch offramp transaction status: ${error}`);
+    }
+  }
+
+  async getOfframpTransactions(partnerUserId: string, pageKey?: string, pageSize: number = 10) {
+    let path = `/onramp/v1/sell/user/${partnerUserId}/transactions?page_size=${pageSize}`;
+    if (pageKey) {
+      path += `&page_key=${pageKey}`;
+    }
+    
+    const headers = await this.getAuthHeaders('GET', path, 'api.developer.coinbase.com');
+    
+    try {
+      const response = await axios.get(`https://api.developer.coinbase.com${path}`, { headers });
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.error('Offramp Transactions Error:', {
+          status: error.response?.status,
+          statusText: error.response?.statusText,
+          data: error.response?.data
+        });
+      }
+      throw new Error(`Failed to fetch offramp transactions: ${error}`);
+    }
+  }
   
 }
 
