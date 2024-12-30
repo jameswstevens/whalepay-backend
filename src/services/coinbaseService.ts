@@ -193,7 +193,6 @@ export class CoinbaseService {
       throw new Error(`Failed to fetch offramp transactions: ${error}`);
     }
   }
-  
 }
 
 export const coinbaseService = new CoinbaseService();

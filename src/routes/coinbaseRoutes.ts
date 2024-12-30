@@ -1,7 +1,7 @@
-import express from 'express';
+import { Router, Request, Response } from 'express';
 import { coinbaseService } from '../services/coinbaseService';
 
-const router = express.Router();
+const router = Router();
 
 // ONRAMP
 
@@ -97,6 +97,24 @@ router.get('/offramp-transactions/:partnerUserId', async (req, res) => {
         );
         
         res.json(transactions);
+    } catch (error) {
+        res.status(500).json({ error: error instanceof Error ? error.message : 'Unknown error' });
+    }
+});
+
+// Get most recent offramp transaction for a user
+router.get('/latest-offramp-transaction/:partnerUserId', async (req, res) => {
+    try {
+        const { partnerUserId } = req.params;
+        
+        const transactions = await coinbaseService.getOfframpTransactions(
+            partnerUserId,
+            undefined,
+            1
+        );
+        
+        const latestTransaction = transactions.transactions[0];
+        res.json({ transaction: latestTransaction });
     } catch (error) {
         res.status(500).json({ error: error instanceof Error ? error.message : 'Unknown error' });
     }
