@@ -135,7 +135,7 @@ export class CoinbaseService {
       const response = await axios.get(`https://api.cdp.coinbase.com${path}`, { 
         headers,
         params: {
-          limit: 100 // Adjust as needed
+          limit: 30 // Adjust as needed
         }
       });
       
