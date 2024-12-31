@@ -17,7 +17,7 @@ export class SupabaseService {
     const { data, error } = await supabase
       .from('users')
       .select('*')
-      .eq('base_address', baseAddress)
+      .ilike('base_address', baseAddress)
       .limit(1);
 
     if (error) {
