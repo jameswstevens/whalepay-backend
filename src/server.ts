@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import coinbaseRoutes from './routes/coinbaseRoutes';
 import { loggingMiddleware } from './middleware/logging';
+import supabaseRoutes from './routes/supabaseRoutes';
 
 const app = express();
 
@@ -16,6 +17,7 @@ app.get('/', (req, res) => {
 });
 
 app.use('/api', coinbaseRoutes);
+app.use('/api/supabase', supabaseRoutes);
 
 // Error handling middleware
 app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
